@@ -1,0 +1,56 @@
+version: '3.7'
+
+services:
+
+  app:
+    build: .
+    image: falcon
+    container_name: gunicorn-falcon
+    ports:
+      - 5000:5000
+    command: gunicorn app:api --bind 0.0.0.0:5000
+    environment:
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+    depends_on:
+      - broker-backend
+
+  worker1:
+    image: async-app
+    container_name: celery-worker1
+    command: celery worker --app app.extensions.queue --concurrency 2 --loglevel WARNING --events
+    environment:
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+    depends_on:
+      - app
+      - broker-backend
+
+  worker2:
+    image: async-app
+    container_name: celery-worker2
+    command: celery worker --app app.extensions.queue --concurrency 2 --loglevel WARNING --events
+    environment:
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+    depends_on:
+      - app
+      - broker-backend
+
+#  monitor:
+#    image: async-app
+#    container_name: flower
+#    command: flower --app app.tasks
+#    ports:
+#      - 5555:5555
+#    environment:
+#      - CELERY_BROKER=redis://redis:6379/0
+#      - CELERY_BACKEND=redis://redis:6379/0
+#      - FLOWER_BROKER=redis://redis:6379/0
+#    depends_on:
+#      - app
+#      - broker-backend
+
+  broker-backend:
+    image: redis:alpine
+    container_name: redis

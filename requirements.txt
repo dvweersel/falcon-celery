@@ -1,0 +1,12 @@
+numpy
+falcon
+falcon-cors
+celery[redis]
+redis
+jsonpickle
+scikit-learn
+python-dotenv
+
+# gunicorn
+waitress # for dev purposes
+# flower for later
