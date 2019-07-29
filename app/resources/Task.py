@@ -18,10 +18,13 @@ class Task:
 
 class TaskStatus:
     @staticmethod
-    def on_get(self, req, resp, task_id):
+    def on_get(req, resp, task_id):
         try:
             task = celery.result.AsyncResult(task_id, queue.backend)
-            resp.body = json.dumps("Task {} status is '{}'".format(task_id, task.status))
+            if task.status == 'SUCCESS':
+                resp.body = json.dumps({'task': task.result})
+            else:
+                resp.body = json.dumps("Task {} status is '{}'".format(task_id, task.status))
         except AttributeError:
             resp.body = json.dumps("Unknown task ID: '{}'".format(task_id))
 

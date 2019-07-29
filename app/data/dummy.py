@@ -1,6 +1,5 @@
 import numpy as np
-
-np.random.seed(8)
+from app.extensions.queue import queue
 
 
 class InputData:
@@ -18,8 +17,9 @@ class InputData:
         return arr + arr * np.random.uniform(-fuzz, fuzz, len(arr))
 
 
+@queue.task(name='data.get_data')
 def get_data():
     data = InputData()
     x, y = data.x, data.noise(data.y, 0.2)  # fuzz the data
 
-    return x, y
+    return x.tolist(), y.tolist()

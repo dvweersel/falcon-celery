@@ -17,9 +17,9 @@ class Fit:
         score = model.fit(x, y)
         model.save()
 
-        resp.body = json.dumps({'success': "Model artefact written in JSON format",
+        resp.body = json.dumps({'success': "Model artifact written in JSON format",
                                 'components': model.get_components(),
-                                'score': score})
+                                'score': model.mse})
 
     @staticmethod
     def on_get(req, resp):
@@ -27,11 +27,15 @@ class Fit:
             Returns the fitted regressor
         """
         model = Regressor()
-        model.load()
+        try:
+            model.load()
 
-        if model.is_fitted:
-            resp.body = json.dumps({'components': model.get_components()})
-        else:
+            if model.is_fitted:
+                resp.body = json.dumps({'components': model.get_components(),
+                                        'score': model.mse})
+            else:
+                resp.body = json.dumps({'error': 'Model not fitted'})
+        except FileNotFoundError as e:
             resp.body = json.dumps({'error': 'Model not fitted'})
 
 
@@ -55,8 +59,11 @@ class Predict:
         try:
             model = Regressor()
             model.load()
-            x = int(req.media.get('x'))
+            x = req.media.get('x')
 
             resp.body = json.dumps(model.predict(x).tolist())  # predict on the same x (!)
         except FileNotFoundError:
             resp.body = json.dumps({'error': "Model not trained yet"})
+        except AttributeError:
+            resp.body = json.dumps({'error': "No input given"})
+

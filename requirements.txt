@@ -2,11 +2,10 @@ numpy
 falcon
 falcon-cors
 celery[redis]
+flower
 redis
 jsonpickle
 scikit-learn
 python-dotenv
-
-# gunicorn
-waitress # for dev purposes
-# flower for later
+gunicorn
+# waitress # for dev purposes
