@@ -1,11 +1,10 @@
-FROM python:3.7-slim
+FROM python:3.7-slim-buster
 
-# set /app as working directory
-ENV APP_DIR /app
-WORKDIR ${APP_DIR}
+RUN pip install --upgrade pip
 
-# copy the codebase
-ADD ./ ${APP_DIR}/
+# Install requirements
+COPY requirements.txt /requirements.txt
+RUN pip install --no-cache-dir -r /requirements.txt
 
-# install requirements
-RUN pip install -r requirements.txt
+COPY . /app
+WORKDIR /app

@@ -8,4 +8,3 @@ jsonpickle
 scikit-learn
 python-dotenv
 gunicorn
-# waitress # for dev purposes

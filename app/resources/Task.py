@@ -8,7 +8,7 @@ from app.extensions.queue import queue
 class Task:
 
     @staticmethod
-    def on_get(req, resp):
+    def on_put(req, resp):
         """
             Create a task and returns ID
         """

@@ -1,9 +1,6 @@
-from dotenv import load_dotenv
-load_dotenv()
-
 import falcon
 from falcon_cors import CORS
-from app.routes import register_routes
+from app.resources import register_routes
 
 
 def create_api():

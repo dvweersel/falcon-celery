@@ -4,11 +4,11 @@ services:
 
   app:
     build: .
-    image: falcon
-    container_name: gunicorn-falcon
+    image: app
+    container_name: falcon
     ports:
       - 5001:5001
-    command: gunicorn app.wsgi:api --bind 0.0.0.0:5001 --workers 4
+    command: gunicorn app.wsgi:api --bind 0.0.0.0:5001 --workers 2 --threads 4 --worker-class gthread --worker-tmp-dir /dev/shm
     env_file:
       - .env
     environment:
@@ -17,23 +17,10 @@ services:
     depends_on:
       - redis
 
-  worker1:
-    image: async-app
+  celery:
+    image: app
     container_name: celery-worker1
-    command: celery worker --app app.extensions.queue --concurrency 2 --loglevel INFO --events
-    env_file:
-      - .env
-    environment:
-      - CELERY_BROKER
-      - CELERY_BACKEND
-    depends_on:
-      - app
-      - redis
-
-  worker2:
-    image: async-app
-    container_name: celery-worker2
-    command: celery worker --app app.extensions.queue --concurrency 2 --loglevel INFO --events
+    command: celery worker --app app.worker --concurrency 2 --loglevel INFO --events
     env_file:
       - .env
     environment:
@@ -44,9 +31,9 @@ services:
       - redis
 
   monitor:
-    image: async-app
+    image: app
     container_name: flower
-    command: flower --app app.extensions.queue
+    command: flower --app app.worker
     ports:
       - 5555:5555
     env_file:
@@ -57,8 +44,11 @@ services:
       - FLOWER_BROKER
     depends_on:
       - app
+      - celery
       - redis
 
   redis:
     image: redis:alpine
     container_name: redis
+    ports:
+      - 6379:6379
